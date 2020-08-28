@@ -1,4 +1,3 @@
-###############################################################################
 REST API client script for batch access to Copernicus Land Monitoring Service data on WEkEO.
 ################################################################################
 
