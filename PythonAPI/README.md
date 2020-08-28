@@ -1,11 +1,11 @@
 # REST API client script for batch access to Copernicus Land Monitoring Service data on WEkEO.
 
-Publication date XXXXXXXX  
+Publication date 28.08.2020   
 License: CC-BY (not decided yet)  
 Script Version 1.0  
 Contact: copernicus@eea.europa.eu  
 
-Requirements: Python Version 2/3??  
+Requirements: Python versions 2 or 3   
 Packages: see imports below  
 
 This Python script allows you to do REST queries to the Copernicus Land Monitoring Service (CLMS) HTTP API.
