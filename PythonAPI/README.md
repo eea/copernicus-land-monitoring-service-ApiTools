@@ -18,10 +18,10 @@ https://cryo.land.copernicus.eu/resto/api/collections/HRSI/search.json
 ## API reference: 
 https://cryo.land.copernicus.eu/resto/api/collections/HRSI/describe.xml
 
-## Installation
-Donwload the script and run:
+## Installation:
+Download the script and run (use correct path):
 ```S
-python CLMS_downloader.py --help
+>python CLMS_downloader.py --help
 ```
 
 ## Legal notice about Copernicus Data:
