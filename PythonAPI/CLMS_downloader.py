@@ -319,6 +319,8 @@ class HRSIRequest(object):
         command.append('-d "grant_type=password"')
         command.append('"https://cryo.land.copernicus.eu/auth/realms/cryo/protocol/openid-connect/token"')
         out = eval(subprocess.check_output(" ".join(command), shell=True))
+        if 'error' in out:
+           logging.error("Following error occured when getting the token: {}".format(out))
         return out['access_token']
 
     def __hrsi_adress__(self, adress_id, credentials):
