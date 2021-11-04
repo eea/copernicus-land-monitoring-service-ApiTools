@@ -91,8 +91,11 @@ class HRSIRequest(object):
     # URL parameter : HRSI productIdentifier T32TLR or FSC_20170913T114531_S2B_T29UNV_V001_0
     URL_PARAM_PRODUCT_IDENTIFIER = 'productIdentifier'
 
-    # URL parameter : HRSI product type (FSC/RLIE/PSA/PSA-LAEA/ARLIE).
+    # URL parameter : HRSI product type (FSC/RLIE/PSA/PSA-LAEA/ARLIE/WDS/SWS/GFSC).
     URL_PARAM_PRODUCT_TYPE = 'productType'
+
+    # URL parameter : HRSI product type (S1/S2/S1-S2).
+    URL_PARAM_MISSION = 'mission'
 
     # URL parameter : HRSI max cloud coverage.
     URL_PARAM_CLOUD_COVER = 'cloudCover'
@@ -143,6 +146,7 @@ class HRSIRequest(object):
     def build_request(self,
                         productIdentifier=None,
                         productType=None,
+                        mission=None,
                         obsDateMin=None,
                         obsDateMax=None,
                         publicationDateMin=None,
@@ -154,6 +158,7 @@ class HRSIRequest(object):
         Build the request to access HR-S&I catalogue.
         :param productIdentifier: text to search in productIdentifier, as string.
         :param productType: product type, as string.
+        :param mission: mission corresponding to the product, as string.
         :param obsDateMin: Min request date, as a datetime object.
         :param obsDateMax: Max request date, as a datetime object.
         :param publicationDateMin: Min publication date, as a datetime object.
@@ -167,9 +172,11 @@ class HRSIRequest(object):
         url_params = {}
         if productIdentifier:
             url_params[HRSIRequest.URL_PARAM_PRODUCT_IDENTIFIER] = (
-                '%25' + productIdentifier + '%25')
+                '%25' + productIdentifier.upper() + '%25')
         if productType:
-            url_params[HRSIRequest.URL_PARAM_PRODUCT_TYPE] = productType
+            url_params[HRSIRequest.URL_PARAM_PRODUCT_TYPE] = productType.upper()
+        if mission:
+            url_params[HRSIRequest.URL_PARAM_MISSION] = mission.upper()
         if obsDateMin:
             url_params[HRSIRequest.URL_PARAM_OBSERVATIONDATE_AFTER] = \
                 validate_Rfc3339(obsDateMin)
@@ -298,6 +305,7 @@ class HRSIRequest(object):
         hrsi_title = read('title')
         hrsi_obs_date = read('startDate')
         hrsi_product_type = read('productType')
+        hrsi_mission = read('mission')
         hrsi_url = read('services')['download']['url']
         hrsi_size = read('services')['download']['size']
         hrsi_publication_date = read('published')
@@ -407,9 +415,9 @@ class HRSIRequest(object):
 def main():
 
     parser = argparse.ArgumentParser(description="""This script provides query and download capabilities for the HR-S&I products, there are three possible modes (query|query_and_download|download), see example usages below:\n
-    > python HRSI_downloader.py output_folder -query -productType FSC -productIdentifier 31TCH -obsDateMin 2020-06-01T00:00:00Z -obsDateMax 2020-06-30T00:00:00Z\n
-    > python HRSI_downloader.py output_folder -hrsi_credentials hrsi_auth.txt -query_and_download -queryURL "https://cryo.land.copernicus.eu/resto/api/collections/HRSI/search.json?maxRecords=1000&publishedAfter=2020-06-29T00:00:00Z&publishedBefore=2020-06-30T00:00:00Z&productType=FSC"\n
-    > python HRSI_downloader.py output_folder -hrsi_credentials hrsi_auth.txt -download -result_file result_file.txt\n""", formatter_class=argparse.RawTextHelpFormatter)
+    > python CLMS_downloader.py output_folder -query -productType FSC -productIdentifier 31TCH -obsDateMin 2020-06-01T00:00:00Z -obsDateMax 2020-06-30T00:00:00Z\n
+    > python CLMS_downloader.py output_folder -hrsi_credentials hrsi_auth.txt -query_and_download -queryURL "https://cryo.land.copernicus.eu/resto/api/collections/HRSI/search.json?maxRecords=1000&publishedAfter=2021-09-05T00:00:00Z&publishedBefore=2021-09-07T00:00:00Z&productType=FSC&mission=S2"\n
+    > python CLMS_downloader.py output_folder -hrsi_credentials hrsi_auth.txt -download -result_file result_file.txt\n""", formatter_class=argparse.RawTextHelpFormatter)
 
     parser.add_argument("output_dir", help="output directory to store HR-S&I products")
 
@@ -426,7 +434,7 @@ def main():
     group_query = parser.add_argument_group("query_params", "mandatory parameters for query and query_and_download modes")
     group_query.add_argument("-queryURL", type=str, help="HTTP query built-in from HR-S&I portal. If no query is provided, other query_params are used to build one from scratch.")
     group_query.add_argument("-productIdentifier", type=str, help="\"T32TLR\" or \"FSC_20170913T114531_S2B_T29UNV_V001_0\"")
-    group_query.add_argument("-productType", type=str, help="FSC|RLIE|PSA|PSA_LAEA|ARLIE")
+    group_query.add_argument("-productType", type=str, help="FSC|RLIE|PSA|PSA_LAEA|ARLIE|WDS|SWS|GFSC")
     group_query.add_argument("-obsDateMin", type=str, help="2020-06-02T00:00:00Z")
     group_query.add_argument("-obsDateMax", type=str, help="2020-06-02T00:00:00Z")
     group_query.add_argument("-publicationDateMin", type=str, help="2020-06-02T00:00:00Z")
@@ -434,6 +442,7 @@ def main():
     group_query.add_argument("-cloudCoverageMax", type=int, help="0-100 (percent)")
     group_query.add_argument("-textualSearch", type=str, help="\"Winter in Finland\"")
     group_query.add_argument("-geometry", type=str, help="WKT geometry as text")
+    group_query.add_argument("-mission", type=str, help="S1|S2|S1-S2")
 
 
     # Parameters to download products from urls obtained through the HR-S&I finder
@@ -459,6 +468,7 @@ def main():
             hrsi_http_request = hrsi.build_request(
                                 args.productIdentifier,
                                 args.productType,
+                                args.mission,
                                 args.obsDateMin,
                                 args.obsDateMax,
                                 args.publicationDateMin,
